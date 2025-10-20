@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Quest: Epic Animated Edition!</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(to bottom, #90EE90, #228B22); 
+            color: #333; 
+            padding: 10px; 
+            margin: 0; 
+            font-size: 16px; 
+            overflow-x: hidden;
+        }
+        h1 { 
+            color: #228B22; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1); 
+            margin: 10px 0; 
+            animation: fadeInDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #game { 
+            max-width: 500px; 
+            margin: auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #game:hover { transform: translateY(-1px); }
+        #difficulty { margin: 20px 0; }
+        #difficulty button { 
+            background: #FFD700; 
+            color: #228B22; 
+            font-weight: bold; 
+            margin: 10px; 
+            padding: 15px 30px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            border: 2px solid #228B22; 
+            font-size: 16px; 
+            width: 100%; 
+            max-width: 300px; 
+            transition: all 0.2s ease; 
+            animation: bounceIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        #difficulty button:hover { 
+            background: #FFA500; 
+            transform: scale(1.02); 
+        }
+        #difficulty button:active { 
+            animation: ripple 0.2s ease; 
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(255, 215, 0, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        #difficulty button:disabled { background: #ccc; cursor: not-allowed; }
+        #quiz { display: none; transition: opacity 0.2s ease; }
+        #quiz.show { opacity: 1; animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #backBtn { 
+            background: #FF6347; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            margin: 10px; 
+            float: left; 
+            transition: all 0.2s ease; 
+        }
+        #backBtn:hover { background: #DC143C; transform: translateX(-1px); }
+        .clear { clear: both; }
+        #question { 
+            font-size: 18px; 
+            margin: 20px 0; 
+            font-weight: bold; 
+            opacity: 0; 
+            animation: fadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        button { 
+            background: #32CD32; 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            margin: 5px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            width: 100%; 
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        button:hover { background: #228B22; transform: translateY(-1px); }
+        button:active { 
+            animation: ripple 0.2s ease; 
+            transform: scale(0.98);
+        }
+        button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        #score { 
+            font-size: 20px; 
+            color: #228B22; 
+            margin: 10px 0; 
+            transition: color 0.2s ease; 
+        }
+        #plant { 
+            font-size: 40px; 
+            margin: 20px 0; 
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            transform-origin: center; 
+        }
+        #plant.grow { 
+            animation: growPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+        }
+        @keyframes growPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        #plant.bloom { 
+            animation: sparkle 0.6s ease-in-out infinite; 
+        }
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.08) rotate(3deg); opacity: 0.9; }
+        }
+        #result { 
+            font-size: 18px; 
+            margin: 20px 0; 
+            padding: 10px; 
+            background: #f0f8ff; 
+            border-radius: 5px; 
+            display: none; 
+            opacity: 0; 
+            transform: translateY(8px); 
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        #result.show { 
+            display: block; 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        #result.correct { background: #90EE90; border-left: 4px solid #228B22; }
+        #result.wrong { background: #FFB6C1; border-left: 4px solid #FF6347; }
+        .option { display: block; width: 100%; margin: 5px 0; }
+        #endMessage { 
+            font-size: 24px; 
+            color: #228B22; 
+            margin: 20px 0; 
+            animation: pulse 0.8s ease-in-out infinite alternate; 
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+        #confettiCanvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            pointer-events: none; 
+            z-index: 10; 
+            width: 100%; 
+            height: 100%; 
+        }
+        @media (max-width: 480px) { 
+            body { padding: 5px; }
+            #game { padding: 15px; }
+            #plant { font-size: 32px; }
+            button { padding: 15px; font-size: 18px; } 
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confettiCanvas"></canvas>
+    <div id="game">
+        <h1>🌱 Plant Quest</h1>
+        <p>Pick your difficulty to start growing knowledge (and a plant)! Epic animations, sounds, & confetti await! ✨</p>
+        
+        <div id="difficulty">
+            <button onclick="startGame('easy')">Easy 🌱 (Beginner Basics)</button>
+            <button onclick="startGame('medium')">Medium 🌿 (Plant Processes)</button>
+            <button onclick="startGame('hard')">Hard 🌸 (Botany Expert)</button>
+        </div>
+        
+        <div id="quiz">
+            <button id="backBtn" onclick="goBack()">← Back to Difficulty</button>
+            <div class="clear"></div>
+            <div id="plant">🌱</div>
+            <div id="score">Sun Points: 0 / 10</div>
+            <div id="question"></div>
+            <div id="options"></div>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const questions = {
+            easy: [
+                { q: "What do plants mainly use sunlight for?", options: ["Photosynthesis", "Growing taller", "Making flowers", "Storing water"], correct: 0, fact: "Photosynthesis turns sunlight, CO2, and water into energy!" },
+                { q: "What is the green pigment in plant leaves?", options: ["Chlorophyll", "Oxygen", "Soil", "Roots"], correct: 0, fact: "Chlorophyll captures sunlight like solar panels." },
+                { q: "Which part of the plant absorbs water from the soil?", options: ["Leaves", "Stem", "Roots", "Flowers"], correct: 2, fact: "Roots act like straws, pulling up water and nutrients." },
+                { q: "What gas do plants release during the day?", options: ["Carbon dioxide", "Nitrogen", "Oxygen", "Hydrogen"], correct: 2, fact: "Plants give us oxygen—breathe easy!" },
+                { q: "What do plants need most of to grow healthy?", options: ["Candy", "Sunlight and water", "Music", "Books"], correct: 1, fact: "Sunlight for energy, water for hydration—perfect combo!" },
+                { q: "What is a plant's 'food factory'?", options: ["Roots", "Stem", "Leaves", "Seeds"], correct: 2, fact: "Leaves make food through photosynthesis." },
+                { q: "Which plants grow in deserts and store water?", options: ["Cacti", "Roses", "Oak trees", "Mushrooms"], correct: 0, fact: "Cacti have spines to save water in hot places." },
+                { q: "What helps plants reproduce with seeds?", options: ["Wind", "Flowers", "Leaves", "Soil"], correct: 1, fact: "Flowers attract pollinators to make seeds." },
+                { q: "What is the process where plants make their own food?", options: ["Respiration", "Photosynthesis", "Digestion", "Evaporation"], correct: 1, fact: "It's like plants cooking with sunlight!" },
+                { q: "Which part of the plant holds it up like a tower?", options: ["Leaves", "Roots", "Stem", "Fruit"], correct: 2, fact: "The stem transports water and supports growth." }
+            ],
+            medium: [
+                { q: "What is the loss of water vapor from plant leaves called?", options: ["Evaporation", "Transpiration", "Condensation", "Precipitation"], correct: 1, fact: "Transpiration helps pull water up from roots and cools the plant." },
+                { q: "Which tissue transports water in plants?", options: ["Phloem", "Xylem", "Epidermis", "Cork"], correct: 1, fact: "Xylem is like plant plumbing, carrying water upward." },
+                { q: "What do carnivorous plants like Venus flytraps eat?", options: ["Sunlight", "Soil", "Insects", "Other plants"], correct: 2, fact: "They trap bugs for extra nutrients in poor soils." },
+                { q: "What is germination?", options: ["Seed sprouting", "Flower blooming", "Leaf falling", "Root dying"], correct: 0, fact: "Germination starts when a seed absorbs water and begins to grow." },
+                { q: "Plants that lose leaves in winter are called:", options: ["Evergreen", "Deciduous", "Annual", "Perennial"], correct: 1, fact: "Deciduous trees save energy by dropping leaves in cold seasons." },
+                { q: "What hormone makes plants grow toward light?", options: ["Auxin", "Gibberellin", "Cytokinin", "Ethylene"], correct: 0, fact: "Auxin causes phototropism, bending stems toward the sun." },
+                { q: "What is symbiosis in plants, like with fungi?", options: ["Competition", "Mutualism", "Predation", "Parasitism"], correct: 1, fact: "Mycorrhizal fungi help plants absorb nutrients in exchange for sugars." },
+                { q: "Which part of the flower attracts pollinators?", options: ["Ovary", "Petal", "Stamen", "Sepal"], correct: 1, fact: "Colorful petals lure bees and butterflies." },
+                { q: "What is the main function of stomata on leaves?", options: ["Gas exchange", "Water storage", "Sugar production", "Light absorption"], correct: 0, fact: "Stomata open to let in CO2 and release O2." },
+                { q: "Plants fix nitrogen with help from:", options: ["Bacteria", "Viruses", "Fungi", "Algae"], correct: 0, fact: "Rhizobia bacteria in root nodules convert N2 to usable forms." }
+            ],
+            hard: [
+                { q: "What are the two types of vascular tissue in plants?", options: ["Epidermis and cortex", "Xylem and phloem", "Palisade and spongy", "Meristem and cambium"], correct: 1, fact: "Xylem (water) and phloem (food) form the plant's transport system." },
+                { q: "Phototropism is growth in response to:", options: ["Gravity", "Light", "Touch", "Water"], correct: 1, fact: "Positive phototropism directs stems toward light sources." },
+                { q: "What is the Calvin cycle part of?", options: ["Dark reactions of photosynthesis", "Light reactions", "Krebs cycle", "Glycolysis"], correct: 0, fact: "It fixes CO2 into sugars using ATP from light reactions." },
+                { q: "Gravitropism causes roots to grow:", options: ["Upward", "Sideways", "Downward", "Randomly"], correct: 2, fact: "Positive gravitropism anchors roots in soil via starch statoliths." },
+                { q: "What is secondary growth driven by?", options: ["Apical meristem", "Vascular cambium", "Leaf primordia", "Root hairs"], correct: 1, fact: "Cambium layers thicken stems and roots annually." },
+                { q: "In C4 plants, what adaptation helps in hot climates?", options: ["Kranz anatomy", "CAM photosynthesis", "Thick cuticles", "Succulent leaves"], correct: 0, fact: "Bundle sheath cells minimize photorespiration in grasses like corn." },
+                { q: "What is abscisic acid's main role?", options: ["Promote growth", "Seed dormancy and stress response", "Fruit ripening", "Cell division"], correct: 1, fact: "ABA closes stomata during drought to conserve water." },
+                { q: "Double fertilization in angiosperms involves:", options: ["One sperm for egg, one for endosperm", "Two eggs", "Pollen tube only", "Self-pollination"], correct: 0, fact: "It ensures seed nourishment via triploid endosperm." },
+                { q: "What is the function of the Casparian strip?", options: ["Block water flow in roots", "Allow selective ion uptake", "Store starch", "Conduct phloem"], correct: 1, fact: "It forces water through cells for controlled absorption." },
+                { q: "Ethylene gas primarily triggers:", options: ["Leaf expansion", "Fruit ripening and senescence", "Root elongation", "Flower initiation"], correct: 1, fact: "It's why bananas ripen faster next to each other!" }
+            ]
+        };
+
+        let currentQuestions = [];
+        let currentQ = 0;
+        let score = 0;
+        let answered = false;
+        let audioCtx;
+        let lastStage = 0;
+        let confettiActive = false;
+
+        const plantStages = [
+            "🌱",  // Seed - 0
+            "🌿",  // Sprout - 3
+            "🌱🌿", // Leaves - 6
+            "🌸",   // Flower - 9
+            "🌺"    // Bloom - 10+
+        ];
+
+        // Confetti Setup
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let particles = [];
+
+        function createConfetti() {
+            if (confettiActive) return;
+            confettiActive = true;
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: Math.random() * 5 + 5,
+                    color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                    size: Math.random() * 5 + 3,
+                    rotation: Math.random() * 360,
+                    vrot: Math.random() * 10 - 5
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // Gravity
+                p.rotation += p.vrot;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+            });
+            particles = particles.filter(p => p.y < canvas.height);
+            if (particles.length > 0) {
+                requestAnimationFrame(animateConfetti);
+            } else {
+                confettiActive = false;
+            }
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(isCorrect) {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (isCorrect) {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } else {
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        function playGrowthSound() {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function playBloomSound() {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.4);
+            gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function startGame(difficulty) {
+            currentQuestions = questions[difficulty];
+            currentQ = 0;
+            score = 0;
+            lastStage = 0;
+            document.getElementById('difficulty').style.display = 'none';
+            document.getElementById('quiz').style.display = 'block';
+            document.getElementById('quiz').classList.add('show');
+            updatePlant();
+            loadQuestion();
+        }
+
+        function goBack() {
+            document.getElementById('quiz').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('quiz').style.display = 'none';
+                document.getElementById('difficulty').style.display = 'block';
+            }, 200);
+            currentQ = 0;
+            score = 0;
+            answered = false;
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('question').textContent = '';
+            document.getElementById('options').innerHTML = '';
+            document.getElementById('plant').classList.remove('grow', 'bloom');
+        }
+
+        function updatePlant() {
+            const stage = Math.min(Math.floor(score / 3), plantStages.length - 1);
+            const plantEl = document.getElementById('plant');
+            plantEl.textContent = plantStages[stage];
+            if (stage > lastStage) {
+                playGrowthSound();
+                plantEl.classList.add('grow');
+                if (stage === plantStages.length - 1) {
+                    plantEl.classList.add('bloom');
+                    playBloomSound();
+                }
+                setTimeout(() => plantEl.classList.remove('grow'), 400);
+            }
+            lastStage = stage;
+        }
+
+        function loadQuestion() {
+            if (currentQ >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+            const q = currentQuestions[currentQ];
+            const questionEl = document.getElementById('question');
+            questionEl.style.animationDelay = '0s';
+            questionEl.textContent = q.q;
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(i);
+                optionsDiv.appendChild(btn);
+            });
+            document.getElementById('result').classList.remove('show');
+            answered = false;
+        }
+
+        function selectAnswer(selected) {
+            if (answered) return;
+            answered = true;
+            const q = currentQuestions[currentQ];
+            const buttons = document.querySelectorAll('#options button');
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) {
+                    btn.style.background = '#228B22';
+                } else if (i === selected) {
+                    btn.style.background = '#FF6347';
+                }
+            });
+
+            const resultDiv = document.getElementById('result');
+            const isCorrect = (selected === q.correct);
+            playSound(isCorrect);
+
+            if (isCorrect) {
+                score++;
+                resultDiv.innerHTML = `Correct! ${q.fact} <br> +1 Sun Point! 🌞`;
+                resultDiv.className = 'show correct';
+            } else {
+                resultDiv.innerHTML = `Oops! The answer is "${q.options[q.correct]}". ${q.fact}`;
+                resultDiv.className = 'show wrong';
+            }
+            document.getElementById('score').textContent = `Sun Points: ${score} / 10`;
+            updatePlant();
+
+            setTimeout(() => {
+                currentQ++;
+                loadQuestion();
+            }, 3000);
+        }
+
+        function endGame() {
+            document.getElementById('question').innerHTML = '<div id="endMessage">Quiz Complete! 🌟</div>';
+            document.getElementById('options').innerHTML = `<button onclick="location.reload()">Play Again</button>`;
+            let message = '';
+            if (score >= 8) {
+                message = 'Phenomenal! You\'re a botany master! 🌺';
+                playBloomSound();
+                createConfetti();
+            } else if (score >= 5) {
+                message = 'Solid work! Your plant knowledge is thriving. 🌿';
+            } else {
+                message = 'Good effort! Every gardener starts somewhere—retry! 🌱';
+            }
+            document.getElementById('result').innerHTML = `${message}<br>Final Score: ${score}/10`;
+            document.getElementById('result').classList.add('show');
+            updatePlant();
+        }
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
